@@ -16,6 +16,7 @@ import registrationsRouter from './routes/registrations';
 import adminRouter from './routes/admin';
 
 export const app = express();
+app.set('trust proxy', 1);
 
 // ─── 1. Request ID (first — needed in all middleware) ─────────────────────────
 app.use(requestId);
