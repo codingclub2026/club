@@ -1,0 +1,233 @@
+// CodeVed Management Platform — Prisma Schema
+// Push to Supabase with: npx prisma db push
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ───────────────────────────────────────────────
+// Enums
+// ───────────────────────────────────────────────
+
+enum AdminRole {
+  super_admin
+  event_manager
+  volunteer
+}
+
+enum EventStatus {
+  draft
+  published
+  cancelled
+  completed
+}
+
+enum RegistrationStatus {
+  pending
+  confirmed
+  cancelled
+  attended
+}
+
+enum AnnouncementScope {
+  all
+  registered
+  event
+}
+
+enum ActorType {
+  admin
+  student
+  system
+}
+
+// ───────────────────────────────────────────────
+// Students (Clerk-backed)
+// ───────────────────────────────────────────────
+
+model User {
+  id            String   @id @default(uuid())
+  clerk_user_id String   @unique
+  email         String   @unique
+  name          String
+  college       String?
+  branch        String?
+  year          Int?
+  phone         String?
+  avatar_url    String?
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  registrations Registration[]
+  bookmarks     Bookmark[]
+
+  @@map("users")
+}
+
+// ───────────────────────────────────────────────
+// Admin Users (separate from Clerk)
+// ───────────────────────────────────────────────
+
+model AdminUser {
+  id              String     @id @default(uuid())
+  admin_id        String     @unique // login username
+  password_hash   String
+  display_name    String
+  role            AdminRole  @default(event_manager)
+  is_active       Boolean    @default(true)
+  failed_attempts Int        @default(0)
+  locked_until    DateTime?
+  last_login_at   DateTime?
+  created_at      DateTime   @default(now())
+  created_by      String?    // UUID of super_admin who created this
+
+  refresh_tokens  AdminRefreshToken[]
+  events_created  Event[]
+  audit_logs      AuditLog[]
+
+  @@map("admin_users")
+}
+
+// ───────────────────────────────────────────────
+// Admin Refresh Tokens (rotation + reuse detection)
+// ───────────────────────────────────────────────
+
+model AdminRefreshToken {
+  id            String     @id @default(uuid())
+  admin_user_id String
+  token_hash    String     @unique // SHA-256 of opaque token
+  family_id     String     // rotation family — revoke all on reuse
+  expires_at    DateTime
+  revoked_at    DateTime?
+  created_at    DateTime   @default(now())
+  user_agent    String?
+  ip            String?
+
+  admin_user    AdminUser  @relation(fields: [admin_user_id], references: [id], onDelete: Cascade)
+
+  @@map("admin_refresh_tokens")
+}
+
+// ───────────────────────────────────────────────
+// Events
+// ───────────────────────────────────────────────
+
+model Event {
+  id                   String        @id @default(uuid())
+  title                String
+  slug                 String        @unique
+  description          String
+  rules                String?
+  venue                String?
+  amount               Float         @default(0)
+  membership           String?
+  whatsapp_group_link  String?
+  poster_url           String?
+  payment_qr_url       String?
+  status               EventStatus   @default(draft)
+  max_participants     Int?
+  registration_deadline DateTime?
+  coordinator_phone     String?
+  created_by           String
+  created_at           DateTime      @default(now())
+  updated_at           DateTime      @updatedAt
+
+  created_by_admin AdminUser     @relation(fields: [created_by], references: [id])
+  registrations    Registration[]
+  bookmarks        Bookmark[]
+  announcements    Announcement[]
+
+  @@map("events")
+}
+
+// ───────────────────────────────────────────────
+// Registrations
+// ───────────────────────────────────────────────
+
+model Registration {
+  id           String             @id @default(uuid())
+  user_id      String
+  event_id     String
+  status            RegistrationStatus @default(pending)
+  name              String?
+  course            String?
+  semester          String?
+  email             String?
+  phone             String?
+  payment_proof_url String?
+  transaction_id    String?
+  registration_no   String?
+  ticket_code       String             @unique @default(uuid())
+  qr_url            String?
+  attended_at       DateTime?
+  cancelled_at      DateTime?
+  created_at        DateTime           @default(now())
+  updated_at        DateTime           @updatedAt
+
+  user         User               @relation(fields: [user_id], references: [id])
+  event        Event              @relation(fields: [event_id], references: [id])
+
+  @@map("registrations")
+}
+
+// ───────────────────────────────────────────────
+// Bookmarks
+// ───────────────────────────────────────────────
+
+model Bookmark {
+  id         String   @id @default(uuid())
+  user_id    String
+  event_id   String
+  created_at DateTime @default(now())
+
+  user       User     @relation(fields: [user_id], references: [id])
+  event      Event    @relation(fields: [event_id], references: [id])
+
+  @@unique([user_id, event_id])
+  @@map("bookmarks")
+}
+
+// ───────────────────────────────────────────────
+// Announcements
+// ───────────────────────────────────────────────
+
+model Announcement {
+  id         String            @id @default(uuid())
+  title      String
+  body       String
+  scope      AnnouncementScope @default(all)
+  event_id   String?
+  created_by String            // admin_users.admin_id
+  created_at DateTime          @default(now())
+  updated_at DateTime          @updatedAt
+
+  event      Event?            @relation(fields: [event_id], references: [id])
+
+  @@map("announcements")
+}
+
+// ───────────────────────────────────────────────
+// Audit Logs
+// ───────────────────────────────────────────────
+
+model AuditLog {
+  id           String    @id @default(uuid())
+  actor_type   ActorType
+  actor_id     String    // admin_users.id or users.id or 'system'
+  action       String    // e.g. admin.login.fail, event.delete, registration.cancel
+  resource     String?   // e.g. event:uuid, registration:uuid
+  meta         Json?
+  ip           String?
+  request_id   String?
+  created_at   DateTime  @default(now())
+
+  admin_user   AdminUser? @relation(fields: [actor_id], references: [id], map: "audit_admin_fk")
+
+  @@map("audit_logs")
+}
