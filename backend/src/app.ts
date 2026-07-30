@@ -61,7 +61,11 @@ app.use(hpp());
 // ─── 7. Global rate limit ─────────────────────────────────────────────────────
 app.use(publicLimiter);
 
-// ─── 8. Health check ─────────────────────────────────────────────────────────
+// ─── 8. Health check & Welcome endpoints ─────────────────────────────────────
+app.get(['/', '/api/v1'], (_req, res) => {
+  res.json({ success: true, message: 'CodeVed API v1 is live and operational 🚀', timestamp: new Date().toISOString() });
+});
+
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
