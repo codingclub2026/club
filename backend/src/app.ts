@@ -34,9 +34,19 @@ const allowedOrigins = [
   'http://localhost:5173',
 ];
 
+const isDev = env.NODE_ENV !== 'production';
+
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin.replace(/\/$/, ''))) {
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+    const cleanOrigin = origin.replace(/\/$/, '');
+    const isAllowed = allowedOrigins.includes(cleanOrigin) ||
+      (isDev && (/^http:\/\/(192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|localhost)(:\d+)?$/).test(cleanOrigin));
+
+    if (isAllowed) {
       callback(null, true);
     } else {
       callback(new Error(`CORS policy blocked origin: ${origin}`));

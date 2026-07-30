@@ -18,7 +18,7 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      const res = await adminApi<{ admin_id: string; display_name: string; role: string }>(
+      const res = await adminApi<{ admin_id: string; display_name: string; role: string; accessToken?: string }>(
         ADMIN_API.login,
         {
           method: "POST",
@@ -27,6 +27,9 @@ export default function AdminLoginPage() {
       );
 
       if (res.success) {
+        if (res.data?.accessToken) {
+          localStorage.setItem("cv_admin_token", res.data.accessToken);
+        }
         // Set a session indicator cookie on this domain so proxy.ts can detect login.
         // max-age=2592000 = 30 days
         document.cookie = "cv_admin_session=1; path=/; SameSite=Lax; max-age=2592000";

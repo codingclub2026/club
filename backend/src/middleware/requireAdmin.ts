@@ -11,29 +11,22 @@ export interface AdminRequest extends Request {
 const SECRET = new TextEncoder().encode(env.ADMIN_JWT_SECRET);
 
 /**
- * requireAdmin — verifies cv_admin_at HttpOnly cookie JWT.
+ * requireAdmin — verifies cv_admin_at HttpOnly cookie or Authorization Bearer Admin JWT.
  * 
  * SECURITY:
- * - Rejects requests that have Authorization: Bearer (Clerk tokens).
- *   Admin routes must NEVER accept a Clerk JWT as identity proof.
+ * - Accepts Admin JWTs from HttpOnly cookie (cv_admin_at) OR Authorization: Bearer <admin_token>.
  * - Validates aud=codeved-admin and iss=codeved-api claims.
+ * - Rejects invalid JWTs, expired JWTs, or Clerk student tokens.
  */
 export async function requireAdmin(
   req: AdminRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> {
-  // Confused-deputy prevention: reject if Authorization header is present
-  if (req.headers.authorization) {
-    res.status(401).json({
-      success: false,
-      error: 'Admin routes do not accept Bearer tokens.',
-      requestId: req.requestId,
-    });
-    return;
-  }
+  const authHeader = req.headers.authorization;
+  const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+  const token = req.cookies?.cv_admin_at || bearerToken;
 
-  const token = req.cookies?.cv_admin_at;
   if (!token) {
     res.status(401).json({
       success: false,

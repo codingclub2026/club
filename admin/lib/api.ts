@@ -8,30 +8,57 @@ interface ApiResponse<T = unknown> {
 }
 
 export async function adminApi<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
+  const token = typeof window !== "undefined" ? localStorage.getItem("cv_admin_token") : null;
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(options.headers as Record<string, string>),
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   const res = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers as Record<string, string>),
-    },
+    headers,
   });
 
   // Auto refresh on 401
   if (res.status === 401 && !endpoint.includes("/admin/auth/login")) {
-    const refresh = await fetch(`${API_URL}/admin/auth/refresh`, {
+    const refreshHeaders: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) {
+      refreshHeaders["Authorization"] = `Bearer ${token}`;
+    }
+
+    const refreshRes = await fetch(`${API_URL}/admin/auth/refresh`, {
       method: "POST",
       credentials: "include",
+      headers: refreshHeaders,
     });
-    if (refresh.ok) {
+
+    if (refreshRes.ok) {
+      const refreshData = await refreshRes.json();
+      const newAccessToken = refreshData?.data?.accessToken;
+      if (newAccessToken && typeof window !== "undefined") {
+        localStorage.setItem("cv_admin_token", newAccessToken);
+        document.cookie = "cv_admin_session=1; path=/; SameSite=Lax; max-age=2592000";
+      }
+
+      const retryHeaders = {
+        ...headers,
+        ...(newAccessToken ? { Authorization: `Bearer ${newAccessToken}` } : {}),
+      };
+
       const retry = await fetch(`${API_URL}${endpoint}`, {
         ...options,
         credentials: "include",
-        headers: { "Content-Type": "application/json", ...(options.headers as Record<string, string>) },
+        headers: retryHeaders,
       });
       return retry.json();
     }
+
     if (typeof window !== "undefined") {
+      localStorage.removeItem("cv_admin_token");
       document.cookie = "cv_admin_session=; path=/; SameSite=Lax; max-age=0";
       window.location.href = "/login";
     }

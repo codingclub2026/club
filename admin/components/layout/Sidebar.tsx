@@ -27,7 +27,10 @@ export default function Sidebar({ adminName, role }: { adminName?: string; role?
     try {
       await adminApi(ADMIN_API.logout, { method: "POST" });
     } finally {
-      // Clear the session indicator cookie so proxy.ts redirects to login
+      // Clear localStorage token and session indicator cookie so proxy.ts redirects to login
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("cv_admin_token");
+      }
       document.cookie = "cv_admin_session=; path=/; SameSite=Lax; max-age=0";
       window.location.href = "/login";
     }

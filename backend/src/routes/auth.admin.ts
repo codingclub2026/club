@@ -58,6 +58,8 @@ router.post('/login', adminLoginLimiter, validate(loginSchema), async (req: Requ
         admin_id: admin.admin_id,
         display_name: admin.display_name,
         role: admin.role,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
       },
       requestId: req.requestId,
     });
@@ -76,7 +78,10 @@ router.post('/login', adminLoginLimiter, validate(loginSchema), async (req: Requ
 // ─── POST /admin/auth/refresh ─────────────────────────────────────────────────
 
 router.post('/refresh', async (req: Request, res: Response) => {
-  const refreshToken = req.cookies?.[REFRESH_COOKIE];
+  // Support refresh token from cookie OR authorization header / body
+  const authHeader = req.headers.authorization;
+  const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+  const refreshToken = req.cookies?.[REFRESH_COOKIE] || bearerToken || req.body?.refreshToken;
   if (!refreshToken) {
     res.status(401).json({ success: false, error: 'Refresh token missing.', requestId: req.requestId });
     return;
@@ -106,7 +111,15 @@ router.post('/refresh', async (req: Request, res: Response) => {
       maxAge: REFRESH_MAX_AGE * 1000,
     });
 
-    res.json({ success: true, data: { refreshed: true }, requestId: req.requestId });
+    res.json({
+      success: true,
+      data: {
+        refreshed: true,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      },
+      requestId: req.requestId,
+    });
   } catch (err: any) {
     const msg = err.message;
     if (msg === 'TOKEN_REUSE') {
