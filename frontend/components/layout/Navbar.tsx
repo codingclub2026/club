@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
 import { Code2, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -17,107 +17,248 @@ export default function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Close mobile drawer when route changes
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   return (
     <nav
+      aria-label="Main Navigation"
       style={{
         position: "fixed",
         top: 0,
         left: 0,
         right: 0,
         zIndex: 100,
-        background: "rgba(10, 10, 15, 0.8)",
+        background: "rgba(5, 6, 13, 0.85)",
         backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
         borderBottom: "1px solid rgba(99, 102, 241, 0.15)",
-        padding: "0 2rem",
         height: "64px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
       }}
     >
-      {/* Logo */}
-      <Link href="/" style={{ display: "flex", alignItems: "center", gap: "0.5rem", textDecoration: "none" }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: "8px",
-          background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          <Code2 size={20} color="white" />
-        </div>
-        <span style={{ fontSize: "1.25rem", fontWeight: 700, color: "#e2e8f0" }}>
-          Code<span style={{ color: "#6366f1" }}>Ved</span>
-        </span>
-      </Link>
-
-      {/* Desktop nav */}
-      <div style={{ display: "flex", alignItems: "center", gap: "2rem" }} className="hidden-mobile">
-        {navLinks.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
+      <div
+        style={{
+          maxWidth: "1280px",
+          margin: "0 auto",
+          height: "100%",
+          padding: "0 1.25rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        {/* Logo */}
+        <Link
+          href="/"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.6rem",
+            textDecoration: "none",
+          }}
+        >
+          <div
             style={{
-              color: pathname === link.href ? "#818cf8" : "#94a3b8",
-              textDecoration: "none",
-              fontSize: "0.9rem",
-              fontWeight: 500,
-              transition: "color 0.2s",
-              borderBottom: pathname === link.href ? "2px solid #6366f1" : "2px solid transparent",
-              paddingBottom: "2px",
+              width: 36,
+              height: 36,
+              borderRadius: "10px",
+              background: "linear-gradient(135deg, #6366f1, #4f46e5)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 0 15px rgba(99, 102, 241, 0.4)",
             }}
           >
-            {link.label}
-          </Link>
-        ))}
-      </div>
+            <Code2 size={20} color="white" />
+          </div>
+          <span
+            style={{
+              fontSize: "1.25rem",
+              fontWeight: 800,
+              color: "#f1f5f9",
+              letterSpacing: "-0.02em",
+              fontFamily: "var(--font-heading, sans-serif)",
+            }}
+          >
+            Code<span style={{ color: "#818cf8" }}>Ved</span>
+          </span>
+        </Link>
 
-      {/* Auth buttons */}
-      <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-        {isSignedIn ? (
-          <UserButton />
-        ) : (
-          <>
-            <SignInButton mode="modal">
-              <button className="btn-secondary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}>
-                Sign In
-              </button>
-            </SignInButton>
-            <SignUpButton mode="modal">
-              <button className="btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}>
-                Sign Up
-              </button>
-            </SignUpButton>
-          </>
-        )}
-
-        {/* Mobile menu toggle */}
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer" }}
-          className="show-mobile"
+        {/* Desktop Nav Links */}
+        <div
+          className="hidden-mobile"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "2rem",
+          }}
         >
-          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+          {navLinks.map((link) => {
+            const isActive =
+              pathname === link.href ||
+              (link.href !== "/" && pathname?.startsWith(link.href));
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                style={{
+                  color: isActive ? "#818cf8" : "#94a3b8",
+                  textDecoration: "none",
+                  fontSize: "0.925rem",
+                  fontWeight: isActive ? 600 : 500,
+                  transition: "all 0.2s ease",
+                  position: "relative",
+                  padding: "0.4rem 0",
+                }}
+              >
+                {link.label}
+                {isActive && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      height: "2px",
+                      borderRadius: "2px",
+                      background: "linear-gradient(90deg, #6366f1, #a855f7)",
+                    }}
+                  />
+                )}
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Desktop & Mobile Actions */}
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          {isSignedIn ? (
+            <UserButton />
+          ) : (
+            <div className="hidden-mobile" style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+              <SignInButton mode="modal">
+                <button
+                  className="btn-secondary"
+                  style={{ padding: "0.45rem 1rem", fontSize: "0.85rem" }}
+                >
+                  Sign In
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button
+                  className="btn-primary"
+                  style={{ padding: "0.45rem 1rem", fontSize: "0.85rem" }}
+                >
+                  Sign Up
+                </button>
+              </SignUpButton>
+            </div>
+          )}
+
+          {/* Mobile Menu Hamburger Toggle */}
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
+            className="show-mobile"
+            style={{
+              background: "rgba(255, 255, 255, 0.05)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              borderRadius: "0.5rem",
+              color: "#e2e8f0",
+              cursor: "pointer",
+              padding: "0.45rem",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "all 0.2s ease",
+            }}
+          >
+            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile Drawer Menu */}
       {mobileOpen && (
-        <div style={{
-          position: "absolute",
-          top: "64px",
-          left: 0,
-          right: 0,
-          background: "#0a0a0f",
-          borderBottom: "1px solid rgba(99, 102, 241, 0.2)",
-          padding: "1rem 2rem",
-          display: "flex",
-          flexDirection: "column",
-          gap: "1rem",
-        }}>
-          {navLinks.map((link) => (
-            <Link key={link.href} href={link.href} style={{ color: "#94a3b8", textDecoration: "none" }} onClick={() => setMobileOpen(false)}>
-              {link.label}
-            </Link>
-          ))}
+        <div
+          className="animate-slide-down show-mobile"
+          style={{
+            position: "absolute",
+            top: "64px",
+            left: 0,
+            right: 0,
+            background: "rgba(10, 11, 22, 0.96)",
+            backdropFilter: "blur(24px)",
+            WebkitBackdropFilter: "blur(24px)",
+            borderBottom: "1px solid rgba(99, 102, 241, 0.25)",
+            padding: "1.25rem 1.5rem 1.75rem 1.5rem",
+            boxShadow: "0 20px 40px rgba(0, 0, 0, 0.7)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "1.25rem",
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            {navLinks.map((link) => {
+              const isActive =
+                pathname === link.href ||
+                (link.href !== "/" && pathname?.startsWith(link.href));
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileOpen(false)}
+                  style={{
+                    color: isActive ? "#ffffff" : "#94a3b8",
+                    background: isActive ? "rgba(99, 102, 241, 0.15)" : "transparent",
+                    borderLeft: isActive ? "3px solid #6366f1" : "3px solid transparent",
+                    padding: "0.65rem 1rem",
+                    borderRadius: "0.375rem",
+                    textDecoration: "none",
+                    fontWeight: isActive ? 600 : 500,
+                    fontSize: "0.95rem",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </div>
+
+          {!isSignedIn && (
+            <div
+              style={{
+                borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+                paddingTop: "1.25rem",
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.75rem",
+              }}
+            >
+              <SignInButton mode="modal">
+                <button
+                  className="btn-secondary"
+                  style={{ width: "100%", justifyContent: "center", padding: "0.65rem" }}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Sign In
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button
+                  className="btn-primary"
+                  style={{ width: "100%", justifyContent: "center", padding: "0.65rem" }}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Sign Up
+                </button>
+              </SignUpButton>
+            </div>
+          )}
         </div>
       )}
     </nav>
