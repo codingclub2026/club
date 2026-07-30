@@ -413,65 +413,68 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
 
-        {/* Grid Info Details */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
-          {/* Card 1: Event Description / Overview with View Button */}
-          <div className="glass" style={{ borderRadius: "1rem", padding: "1.75rem", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1rem" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                  <FileText size={20} color="#6366f1" />
-                  <h2 style={{ color: "#e2e8f0", fontSize: "1.25rem", fontWeight: 700 }}>Overview</h2>
+        {/* Grid Info Details: 2 Column Layout */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
+          {/* LEFT COLUMN: Overview (Top) + Rules & Guidelines (Down Description) */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            {/* Description / Overview Card */}
+            <div className="glass" style={{ borderRadius: "1rem", padding: "1.75rem", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1rem" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <FileText size={20} color="#6366f1" />
+                    <h2 style={{ color: "#e2e8f0", fontSize: "1.25rem", fontWeight: 700 }}>Overview</h2>
+                  </div>
+                  <button
+                    onClick={() => setShowDescModal(true)}
+                    className="btn-secondary"
+                    style={{ padding: "0.45rem 1rem", fontSize: "0.85rem", display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
+                  >
+                    <FileText size={15} /> View Full Description
+                  </button>
                 </div>
-                <button
-                  onClick={() => setShowDescModal(true)}
-                  className="btn-secondary"
-                  style={{ padding: "0.45rem 1rem", fontSize: "0.85rem", display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
-                >
-                  <FileText size={15} /> View Full Description
-                </button>
-              </div>
-              <p style={{ color: "#94a3b8", lineHeight: 1.65, fontSize: "0.925rem", display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                {event.description}
-              </p>
-            </div>
-
-            <div style={{ marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.08)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontSize: "0.8rem", color: "#64748b" }}>Click button to view full text in popup</span>
-              <button
-                onClick={() => setShowDescModal(true)}
-                style={{
-                  background: "none", border: "none", color: "#818cf8", fontSize: "0.85rem", fontWeight: 600, cursor: "pointer", textDecoration: "underline"
-                }}
-              >
-                View Description →
-              </button>
-            </div>
-          </div>
-
-          {/* Card 2: Separate Rules & Guidelines Card */}
-          {event.rules && (
-            <div className="glass" style={{ borderRadius: "1rem", padding: "1.75rem", display: "flex", flexDirection: "column", borderLeft: "4px solid #a855f7" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
-                <BookOpen size={20} color="#a855f7" />
-                <h2 style={{ color: "#e2e8f0", fontSize: "1.25rem", fontWeight: 700 }}>Rules & Guidelines</h2>
-              </div>
-              <div
-                className="custom-scrollbar"
-                style={{
-                  maxHeight: "260px",
-                  overflowY: "auto",
-                  paddingRight: "0.5rem",
-                }}
-              >
-                <p style={{ color: "#94a3b8", fontSize: "0.9rem", lineHeight: 1.6, whiteSpace: "pre-line" }}>
-                  {event.rules}
+                <p style={{ color: "#94a3b8", lineHeight: 1.65, fontSize: "0.925rem", display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                  {event.description}
                 </p>
               </div>
-            </div>
-          )}
 
-          {/* Quick Action Links: Payment QR & WhatsApp */}
+              <div style={{ marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.08)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: "0.8rem", color: "#64748b" }}>Click button to view full text in popup</span>
+                <button
+                  onClick={() => setShowDescModal(true)}
+                  style={{
+                    background: "none", border: "none", color: "#818cf8", fontSize: "0.85rem", fontWeight: 600, cursor: "pointer", textDecoration: "underline"
+                  }}
+                >
+                  View Description →
+                </button>
+              </div>
+            </div>
+
+            {/* Rules & Guidelines Card (Placed down the Description section) */}
+            {event.rules && (
+              <div className="glass" style={{ borderRadius: "1rem", padding: "1.75rem", display: "flex", flexDirection: "column", borderLeft: "4px solid #a855f7" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+                  <BookOpen size={20} color="#a855f7" />
+                  <h2 style={{ color: "#e2e8f0", fontSize: "1.25rem", fontWeight: 700 }}>Rules & Guidelines</h2>
+                </div>
+                <div
+                  className="custom-scrollbar"
+                  style={{
+                    maxHeight: "260px",
+                    overflowY: "auto",
+                    paddingRight: "0.5rem",
+                  }}
+                >
+                  <p style={{ color: "#94a3b8", fontSize: "0.9rem", lineHeight: 1.6, whiteSpace: "pre-line" }}>
+                    {event.rules}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* RIGHT COLUMN: Payment QR (Top) + WhatsApp Group (Downside of QR section) */}
           <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
             {/* Payment QR section */}
             {event.payment_qr_url && (
@@ -484,7 +487,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
               </div>
             )}
 
-            {/* WhatsApp Group Link */}
+            {/* WhatsApp Group Link (Placed downside of the QR section) */}
             {event.whatsapp_group_link && (
               <div className="glass" style={{ borderRadius: "1rem", padding: "1.5rem", background: "rgba(37,211,102,0.08)", border: "1px solid rgba(37,211,102,0.3)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#25D366", fontWeight: 700, marginBottom: "0.5rem", fontSize: "1.05rem" }}>
