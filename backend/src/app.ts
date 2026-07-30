@@ -25,8 +25,23 @@ app.use(requestId);
 app.use(securityHeaders);
 
 // ─── 3. CORS — strict allowlist ───────────────────────────────────────────────
+const allowedOrigins = [
+  env.FRONTEND_ORIGIN.replace(/\/$/, ''),
+  env.ADMIN_ORIGIN.replace(/\/$/, ''),
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:3002',
+  'http://localhost:5173',
+];
+
 app.use(cors({
-  origin: [env.FRONTEND_ORIGIN, env.ADMIN_ORIGIN, 'http://localhost:3001', 'http://localhost:3002'],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin.replace(/\/$/, ''))) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS policy blocked origin: ${origin}`));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
