@@ -27,7 +27,10 @@ export default function AdminLoginPage() {
       );
 
       if (res.success) {
-        router.push("/dashboard");
+        // Set a session indicator cookie on this domain so proxy.ts can detect login
+        // The actual auth tokens are HttpOnly cookies managed by the backend
+        document.cookie = "cv_admin_session=1; path=/; SameSite=Lax; max-age=900"; // 15 min matches access token
+        window.location.href = "/dashboard";
       } else {
         setError(res.error ?? "Invalid credentials");
       }

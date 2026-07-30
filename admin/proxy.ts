@@ -11,9 +11,10 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check for admin access cookie
-  const adminCookie = req.cookies.get("cv_admin_at");
-  if (!adminCookie) {
+  // cv_admin_session is a JS-set cookie on this domain, set after successful backend login.
+  // cv_admin_at is httpOnly on the backend domain and NOT accessible here (cross-domain).
+  const sessionCookie = req.cookies.get("cv_admin_session");
+  if (!sessionCookie) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 

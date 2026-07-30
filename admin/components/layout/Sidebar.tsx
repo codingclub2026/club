@@ -27,7 +27,9 @@ export default function Sidebar({ adminName, role }: { adminName?: string; role?
     try {
       await adminApi(ADMIN_API.logout, { method: "POST" });
     } finally {
-      router.push("/login");
+      // Clear the session indicator cookie so proxy.ts redirects to login
+      document.cookie = "cv_admin_session=; path=/; SameSite=Lax; max-age=0";
+      window.location.href = "/login";
     }
   };
 
