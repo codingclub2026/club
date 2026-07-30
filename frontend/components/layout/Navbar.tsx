@@ -49,41 +49,57 @@ export default function Navbar() {
           justifyContent: "space-between",
         }}
       >
-        {/* Logo */}
+        {/* Logo & University Name */}
         <Link
           href="/"
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "0.6rem",
+            gap: "0.75rem",
             textDecoration: "none",
           }}
         >
-          <div
+          <img
+            src="https://ik.imagekit.io/ioyklag3bb/RKDF-LOGO.png?updatedAt=1781854542857"
+            alt="RKDF University Ranchi Logo"
             style={{
-              width: 36,
-              height: 36,
-              borderRadius: "10px",
-              background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 0 15px rgba(99, 102, 241, 0.4)",
+              height: "38px",
+              width: "auto",
+              maxHeight: "38px",
+              objectFit: "contain",
+              borderRadius: "6px",
+              background: "rgba(255, 255, 255, 0.95)",
+              padding: "2px 4px",
+              boxShadow: "0 0 12px rgba(255, 255, 255, 0.2)",
             }}
-          >
-            <Code2 size={20} color="white" />
+          />
+          <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            <span
+              style={{
+                fontSize: "1.15rem",
+                fontWeight: 800,
+                color: "#f1f5f9",
+                letterSpacing: "-0.01em",
+                fontFamily: "var(--font-heading, sans-serif)",
+                lineHeight: 1.1,
+              }}
+            >
+              Code<span style={{ color: "#818cf8" }}>Ved</span>
+            </span>
+            <span
+              style={{
+                fontSize: "0.65rem",
+                fontWeight: 700,
+                color: "#a855f7",
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                marginTop: "1px",
+                whiteSpace: "nowrap",
+              }}
+            >
+              RKDF UNIVERSITY RANCHI
+            </span>
           </div>
-          <span
-            style={{
-              fontSize: "1.25rem",
-              fontWeight: 800,
-              color: "#f1f5f9",
-              letterSpacing: "-0.02em",
-              fontFamily: "var(--font-heading, sans-serif)",
-            }}
-          >
-            Code<span style={{ color: "#818cf8" }}>Ved</span>
-          </span>
         </Link>
 
         {/* Desktop Nav Links */}
