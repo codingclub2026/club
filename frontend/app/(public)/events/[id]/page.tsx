@@ -18,10 +18,10 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
   const [registrationRecord, setRegistrationRecord] = useState<any>(null);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  // Registration & details modal state
+  // Registration & description modal state
   const [showRegModal, setShowRegModal] = useState(false);
   const [showPassModal, setShowPassModal] = useState(false);
-  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showDescModal, setShowDescModal] = useState(false);
 
   const [regForm, setRegForm] = useState({
     name: "",
@@ -413,47 +413,107 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
 
-        {/* Grid Info Details / Overview Card */}
+        {/* Grid Info Details */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
-          {/* Main Overview Teaser Card with View Details Button */}
+          {/* Card 1: Event Description / Overview with View Button */}
           <div className="glass" style={{ borderRadius: "1rem", padding: "1.75rem", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
             <div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1rem" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                  <FileText size={22} color="#6366f1" />
-                  <h2 style={{ color: "#e2e8f0", fontSize: "1.25rem", fontWeight: 700 }}>Event Overview & Rules</h2>
+                  <FileText size={20} color="#6366f1" />
+                  <h2 style={{ color: "#e2e8f0", fontSize: "1.25rem", fontWeight: 700 }}>Overview</h2>
                 </div>
                 <button
-                  onClick={() => setShowDetailModal(true)}
-                  className="btn-primary"
-                  style={{ padding: "0.55rem 1.25rem", fontSize: "0.875rem", display: "inline-flex", alignItems: "center", gap: "0.5rem" }}
+                  onClick={() => setShowDescModal(true)}
+                  className="btn-secondary"
+                  style={{ padding: "0.45rem 1rem", fontSize: "0.85rem", display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
                 >
-                  <FileText size={16} /> View Full Description & Guidelines →
+                  <FileText size={15} /> View Full Description
                 </button>
               </div>
-              <p style={{ color: "#94a3b8", lineHeight: 1.6, fontSize: "0.925rem", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+              <p style={{ color: "#94a3b8", lineHeight: 1.65, fontSize: "0.925rem", display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                 {event.description}
               </p>
             </div>
 
-            <div style={{ marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.08)", display: "flex", gap: "1rem", alignItems: "center", flexWrap: "wrap" }}>
+            <div style={{ marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.08)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "0.8rem", color: "#64748b" }}>Click button to view full text in popup</span>
               <button
-                onClick={() => setShowDetailModal(true)}
-                className="btn-secondary"
-                style={{ fontSize: "0.85rem", padding: "0.45rem 1rem" }}
+                onClick={() => setShowDescModal(true)}
+                style={{
+                  background: "none", border: "none", color: "#818cf8", fontSize: "0.85rem", fontWeight: 600, cursor: "pointer", textDecoration: "underline"
+                }}
               >
-                Click to open Popup Modal
+                View Description →
               </button>
-              {event.rules && (
-                <span style={{ fontSize: "0.8rem", color: "#a78bfa", fontWeight: 600 }}>
-                  ✓ Includes Event Rules & Guidelines
-                </span>
-              )}
             </div>
           </div>
 
-          {/* Quick Action Column: Registration Pass / Status */}
+          {/* Card 2: Separate Rules & Guidelines Card */}
+          {event.rules && (
+            <div className="glass" style={{ borderRadius: "1rem", padding: "1.75rem", display: "flex", flexDirection: "column", borderLeft: "4px solid #a855f7" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+                <BookOpen size={20} color="#a855f7" />
+                <h2 style={{ color: "#e2e8f0", fontSize: "1.25rem", fontWeight: 700 }}>Rules & Guidelines</h2>
+              </div>
+              <div
+                className="custom-scrollbar"
+                style={{
+                  maxHeight: "260px",
+                  overflowY: "auto",
+                  paddingRight: "0.5rem",
+                }}
+              >
+                <p style={{ color: "#94a3b8", fontSize: "0.9rem", lineHeight: 1.6, whiteSpace: "pre-line" }}>
+                  {event.rules}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Quick Action Links: Payment QR & WhatsApp */}
           <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            {/* Payment QR section */}
+            {event.payment_qr_url && (
+              <div className="glass" style={{ borderRadius: "1rem", padding: "1.5rem", textAlign: "center" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", color: "#34d399", fontWeight: 700, marginBottom: "0.75rem" }}>
+                  <QrCode size={20} /> Payment QR Code
+                </div>
+                <img src={event.payment_qr_url} alt="Payment QR" style={{ width: 160, height: 160, objectFit: "contain", borderRadius: "0.75rem", background: "white", padding: "0.5rem", margin: "0 auto 0.75rem", border: "2px solid #34d39940" }} />
+                <p style={{ color: "#94a3b8", fontSize: "0.8rem" }}>Scan QR code to pay registration fee (₹{event.amount})</p>
+              </div>
+            )}
+
+            {/* WhatsApp Group Link */}
+            {event.whatsapp_group_link && (
+              <div className="glass" style={{ borderRadius: "1rem", padding: "1.5rem", background: "rgba(37,211,102,0.08)", border: "1px solid rgba(37,211,102,0.3)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#25D366", fontWeight: 700, marginBottom: "0.5rem", fontSize: "1.05rem" }}>
+                  <MessageSquare size={20} /> Official WhatsApp Group
+                </div>
+                <p style={{ color: "#94a3b8", fontSize: "0.85rem", marginBottom: "1rem" }}>
+                  Join the official WhatsApp group for real-time announcements & updates.
+                </p>
+                <a href={event.whatsapp_group_link} target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}>
+                  <button style={{
+                    width: "100%",
+                    background: "#25D366",
+                    color: "white",
+                    border: "none",
+                    padding: "0.75rem",
+                    borderRadius: "0.5rem",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.5rem",
+                  }}>
+                    <MessageSquare size={18} /> Join WhatsApp Group
+                  </button>
+                </a>
+              </div>
+            )}
+
             {/* Registration No (Only when approved by Admin) */}
             {isApproved && (
               <div className="glass" style={{ borderRadius: "1rem", padding: "1.5rem", textAlign: "center", background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.3)" }}>
@@ -463,43 +523,29 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
                 </p>
               </div>
             )}
-
-            {/* Quick Popup trigger card */}
-            <div className="glass" style={{ borderRadius: "1rem", padding: "1.5rem", background: "rgba(99,102,241,0.05)", border: "1px solid rgba(99,102,241,0.2)" }}>
-              <h3 style={{ color: "#818cf8", fontSize: "1rem", fontWeight: 700, marginBottom: "0.5rem" }}>Event Guidelines & Payment QR</h3>
-              <p style={{ color: "#94a3b8", fontSize: "0.85rem", marginBottom: "1rem", lineHeight: 1.5 }}>
-                Click below to view full event description, rules, payment QR code, and official WhatsApp group.
-              </p>
-              <button
-                onClick={() => setShowDetailModal(true)}
-                className="btn-secondary"
-                style={{ width: "100%", justifyContent: "center", padding: "0.65rem", fontSize: "0.875rem" }}
-              >
-                <FileText size={16} /> Open Event Details Popup
-              </button>
-            </div>
           </div>
         </div>
       </div>
 
-      {/* ─── EVENT DETAILS & GUIDELINES POPUP MODAL ────────────────────────── */}
-      {showDetailModal && (
+      {/* ─── FULL DESCRIPTION POPUP MODAL ONLY ────────────────────────── */}
+      {showDescModal && (
         <div style={{
           position: "fixed", inset: 0, zIndex: 110,
           background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)",
           WebkitBackdropFilter: "blur(8px)",
           display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem",
         }}>
-          <div className="glass custom-scrollbar" style={{
-            width: "100%", maxWidth: 940, maxHeight: "90vh",
-            overflowY: "auto", borderRadius: "1.25rem", padding: "1.75rem",
+          <div className="glass" style={{
+            width: "100%", maxWidth: 680, maxHeight: "85vh",
+            borderRadius: "1.25rem", padding: "1.75rem",
             border: "1px solid rgba(99,102,241,0.35)", background: "rgba(10, 11, 22, 0.96)",
             boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.8)",
+            display: "flex", flexDirection: "column",
           }}>
             {/* Modal Header */}
             <div style={{
               display: "flex", justifyContent: "space-between", alignItems: "center",
-              marginBottom: "1.5rem", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "1rem",
+              marginBottom: "1.25rem", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "1rem",
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                 <div style={{
@@ -510,19 +556,19 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
                   <FileText size={20} color="#818cf8" />
                 </div>
                 <div>
-                  <h2 style={{ color: "#e2e8f0", fontSize: "1.35rem", fontWeight: 800 }}>
-                    {event.title} — Event Details & Guidelines
+                  <h2 style={{ color: "#e2e8f0", fontSize: "1.25rem", fontWeight: 800 }}>
+                    Event Description
                   </h2>
                   <p style={{ color: "#94a3b8", fontSize: "0.825rem" }}>
-                    Full description, rules, payment QR code & official WhatsApp group
+                    {event.title}
                   </p>
                 </div>
               </div>
               <button
-                onClick={() => setShowDetailModal(false)}
+                onClick={() => setShowDescModal(false)}
                 style={{
                   background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: "0.5rem", color: "#94a3b8", cursor: "pointer", padding: "0.4rem",
+                  borderRadius: "0.5rem", color: "#94a3b8", cursor: "pointer", padding: "0.45rem",
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}
               >
@@ -530,116 +576,27 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
               </button>
             </div>
 
-            {/* Modal Body */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-              {/* TOP ROW: Description (Left with Scroller) + Payment QR Code (Right beside Description) */}
-              <div style={{
-                display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-                gap: "1.25rem", alignItems: "stretch",
-              }}>
-                {/* Description Section with Scroller */}
-                <div style={{
-                  background: "rgba(15, 18, 35, 0.6)", border: "1px solid rgba(255, 255, 255, 0.08)",
-                  borderRadius: "0.875rem", padding: "1.25rem", display: "flex", flexDirection: "column",
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
-                    <FileText size={18} color="#6366f1" />
-                    <h3 style={{ color: "#e2e8f0", fontSize: "1.1rem", fontWeight: 700 }}>Description</h3>
-                  </div>
-                  <div className="custom-scrollbar" style={{ maxHeight: "240px", overflowY: "auto", paddingRight: "0.5rem" }}>
-                    <p style={{ color: "#94a3b8", lineHeight: 1.65, fontSize: "0.9rem", whiteSpace: "pre-line" }}>
-                      {event.description}
-                    </p>
-                  </div>
-                </div>
+            {/* Modal Description Content with Scroller */}
+            <div className="custom-scrollbar" style={{
+              overflowY: "auto", maxHeight: "400px", paddingRight: "0.5rem",
+            }}>
+              <p style={{ color: "#cbd5e1", lineHeight: 1.7, fontSize: "0.95rem", whiteSpace: "pre-line" }}>
+                {event.description}
+              </p>
+            </div>
 
-                {/* Payment QR Code Section (Beside Description) */}
-                <div style={{
-                  background: "rgba(15, 18, 35, 0.6)", border: "1px solid rgba(52, 211, 153, 0.25)",
-                  borderRadius: "0.875rem", padding: "1.25rem", textAlign: "center",
-                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#34d399", fontWeight: 700, marginBottom: "0.5rem", fontSize: "0.95rem" }}>
-                    <QrCode size={18} /> Payment QR Code
-                  </div>
-                  {event.payment_qr_url ? (
-                    <>
-                      <img
-                        src={event.payment_qr_url}
-                        alt="Payment QR Code"
-                        style={{
-                          width: 140, height: 140, objectFit: "contain", borderRadius: "0.5rem",
-                          background: "white", padding: "0.4rem", margin: "0.25rem 0 0.5rem",
-                          border: "2px solid #34d39940",
-                        }}
-                      />
-                      <p style={{ color: "#94a3b8", fontSize: "0.775rem" }}>
-                        Scan QR code to pay fee (₹{event.amount})
-                      </p>
-                    </>
-                  ) : (
-                    <div style={{ padding: "1rem 0", color: "#64748b", fontSize: "0.85rem" }}>
-                      <p style={{ color: "#34d399", fontWeight: 700, marginBottom: "0.25rem" }}>
-                        {event.amount > 0 ? `Registration Fee: ₹${event.amount}` : "Free Registration"}
-                      </p>
-                      <p>No separate payment QR code required.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* BOTTOM ROW: Rules (Left with Scroller) + WhatsApp Group (Right beside Rules) */}
-              <div style={{
-                display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-                gap: "1.25rem", alignItems: "stretch",
-              }}>
-                {/* Rules & Guidelines Section with Scroller (Downside of Description) */}
-                <div style={{
-                  background: "rgba(15, 18, 35, 0.6)", border: "1px solid rgba(168, 85, 247, 0.25)",
-                  borderLeft: "4px solid #a855f7", borderRadius: "0.875rem", padding: "1.25rem",
-                  display: "flex", flexDirection: "column",
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
-                    <BookOpen size={18} color="#a855f7" />
-                    <h3 style={{ color: "#e2e8f0", fontSize: "1.1rem", fontWeight: 700 }}>Rules & Guidelines</h3>
-                  </div>
-                  <div className="custom-scrollbar" style={{ maxHeight: "220px", overflowY: "auto", paddingRight: "0.5rem" }}>
-                    <p style={{ color: "#94a3b8", fontSize: "0.875rem", lineHeight: 1.6, whiteSpace: "pre-line" }}>
-                      {event.rules || "Standard RKDF University technical event guidelines and code of conduct apply to all participants."}
-                    </p>
-                  </div>
-                </div>
-
-                {/* WhatsApp Group Section (Beside Rules) */}
-                <div style={{
-                  background: "rgba(37, 211, 102, 0.06)", border: "1px solid rgba(37, 211, 102, 0.25)",
-                  borderRadius: "0.875rem", padding: "1.25rem", display: "flex", flexDirection: "column",
-                  justifyContent: "center",
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#25D366", fontWeight: 700, marginBottom: "0.5rem", fontSize: "0.95rem" }}>
-                    <MessageSquare size={18} /> Official WhatsApp Group
-                  </div>
-                  <p style={{ color: "#94a3b8", fontSize: "0.825rem", marginBottom: "0.85rem", lineHeight: 1.5 }}>
-                    Join the official event WhatsApp group for real-time announcements & participant updates.
-                  </p>
-                  {event.whatsapp_group_link ? (
-                    <a href={event.whatsapp_group_link} target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}>
-                      <button style={{
-                        width: "100%", background: "#25D366", color: "white", border: "none",
-                        borderRadius: "0.5rem", padding: "0.6rem 1rem", fontWeight: 700,
-                        fontSize: "0.85rem", cursor: "pointer", display: "flex",
-                        alignItems: "center", justifyContent: "center", gap: "0.5rem",
-                      }}>
-                        <MessageSquare size={16} /> Join WhatsApp Group
-                      </button>
-                    </a>
-                  ) : (
-                    <p style={{ color: "#64748b", fontSize: "0.775rem", fontStyle: "italic" }}>
-                      WhatsApp group link will be shared upon registration confirmation.
-                    </p>
-                  )}
-                </div>
-              </div>
+            {/* Modal Footer */}
+            <div style={{
+              marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.08)",
+              display: "flex", justifyContent: "flex-end",
+            }}>
+              <button
+                onClick={() => setShowDescModal(false)}
+                className="btn-primary"
+                style={{ padding: "0.5rem 1.25rem", fontSize: "0.875rem" }}
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
