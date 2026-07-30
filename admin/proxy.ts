@@ -11,13 +11,9 @@ export default function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // cv_admin_session is a JS-set cookie on this domain, set after successful backend login.
-  // cv_admin_at is httpOnly on the backend domain and NOT accessible here (cross-domain).
-  const sessionCookie = req.cookies.get("cv_admin_session");
-  if (!sessionCookie) {
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
-
+  // Client-side adminApi & localStorage Bearer tokens handle authentication on mobile/desktop.
+  // We do not hard-redirect server-side here to prevent mobile Safari/Chrome ITP from dropping
+  // top-level navigations before client Bearer tokens can be attached.
   return NextResponse.next();
 }
 

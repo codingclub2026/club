@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { adminApi, ADMIN_API } from "@/lib/api";
 import { Code2, Lock, User, Eye, EyeOff, AlertCircle, ShieldCheck } from "lucide-react";
@@ -12,13 +12,19 @@ export default function AdminLoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && localStorage.getItem("cv_admin_token")) {
+      router.push("/dashboard");
+    }
+  }, [router]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      const res = await adminApi<{ admin_id: string; display_name: string; role: string; accessToken?: string }>(
+      const res = await adminApi<{ admin_id: string; display_name: string; role: string; accessToken?: string; refreshToken?: string }>(
         ADMIN_API.login,
         {
           method: "POST",
@@ -30,10 +36,12 @@ export default function AdminLoginPage() {
         if (res.data?.accessToken) {
           localStorage.setItem("cv_admin_token", res.data.accessToken);
         }
+        if (res.data?.refreshToken) {
+          localStorage.setItem("cv_admin_refresh_token", res.data.refreshToken);
+        }
         // Set a session indicator cookie on this domain so proxy.ts can detect login.
-        // max-age=2592000 = 30 days
         document.cookie = "cv_admin_session=1; path=/; SameSite=Lax; max-age=2592000";
-        window.location.href = "/dashboard";
+        router.push("/dashboard");
       } else {
         setError(res.error ?? "Invalid credentials");
       }

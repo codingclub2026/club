@@ -25,22 +25,26 @@ export async function adminApi<T>(endpoint: string, options: RequestInit = {}): 
 
   // Auto refresh on 401
   if (res.status === 401 && !endpoint.includes("/admin/auth/login")) {
+    const refreshToken = typeof window !== "undefined" ? localStorage.getItem("cv_admin_refresh_token") : null;
     const refreshHeaders: Record<string, string> = { "Content-Type": "application/json" };
-    if (token) {
-      refreshHeaders["Authorization"] = `Bearer ${token}`;
+    if (refreshToken) {
+      refreshHeaders["Authorization"] = `Bearer ${refreshToken}`;
     }
 
     const refreshRes = await fetch(`${API_URL}/admin/auth/refresh`, {
       method: "POST",
       credentials: "include",
       headers: refreshHeaders,
+      body: JSON.stringify({ refreshToken }),
     });
 
     if (refreshRes.ok) {
       const refreshData = await refreshRes.json();
       const newAccessToken = refreshData?.data?.accessToken;
-      if (newAccessToken && typeof window !== "undefined") {
-        localStorage.setItem("cv_admin_token", newAccessToken);
+      const newRefreshToken = refreshData?.data?.refreshToken;
+      if (typeof window !== "undefined") {
+        if (newAccessToken) localStorage.setItem("cv_admin_token", newAccessToken);
+        if (newRefreshToken) localStorage.setItem("cv_admin_refresh_token", newRefreshToken);
         document.cookie = "cv_admin_session=1; path=/; SameSite=Lax; max-age=2592000";
       }
 
@@ -59,6 +63,7 @@ export async function adminApi<T>(endpoint: string, options: RequestInit = {}): 
 
     if (typeof window !== "undefined") {
       localStorage.removeItem("cv_admin_token");
+      localStorage.removeItem("cv_admin_refresh_token");
       document.cookie = "cv_admin_session=; path=/; SameSite=Lax; max-age=0";
       window.location.href = "/login";
     }
