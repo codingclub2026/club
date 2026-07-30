@@ -263,28 +263,8 @@ router.get('/audit-logs', requireRole('super_admin'), async (req: AdminRequest, 
   }
 });
 
-// ─── POST /admin/announcements ────────────────────────────────────────────────
 
-router.post('/announcements', requireRole('event_manager'), validate(announcementSchema), async (req: AdminRequest, res: Response) => {
-  try {
-    const announcement = await prisma.announcement.create({
-      data: {
-        ...req.body,
-        created_by: req.adminId!,
-      },
-    });
-    res.status(201).json({ success: true, data: announcement, requestId: req.requestId });
-  } catch {
-    res.status(500).json({ success: false, error: 'Failed to create announcement.', requestId: req.requestId });
-  }
-});
 
-// ─── GET /admin/announcements ─────────────────────────────────────────────────
-
-router.get('/announcements', async (req: AdminRequest, res: Response) => {
-  const announcements = await prisma.announcement.findMany({ orderBy: { created_at: 'desc' } });
-  res.json({ success: true, data: announcements, requestId: req.requestId });
-});
 
 // ─── GET /admin/export/registrations — CSV Export ────────────────────────────
 

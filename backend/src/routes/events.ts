@@ -144,9 +144,7 @@ router.delete('/:id', requireAdmin, requireRole('event_manager'), async (req: Ad
   try {
     const eventId3 = String(req.params.id);
 
-    // Delete associated announcements & bookmarks first if exist
-    await prisma.announcement.deleteMany({ where: { event_id: eventId3 } });
-    await prisma.bookmark.deleteMany({ where: { event_id: eventId3 } });
+    // Delete associated registrations first
     await prisma.registration.deleteMany({ where: { event_id: eventId3 } });
     await prisma.event.delete({ where: { id: eventId3 } });
 
@@ -154,33 +152,6 @@ router.delete('/:id', requireAdmin, requireRole('event_manager'), async (req: Ad
   } catch (err: any) {
     console.error('❌ DELETE /events/:id failed:', err);
     res.status(500).json({ success: false, error: err.message ?? 'Failed to delete event.', requestId: req.requestId });
-  }
-});
-
-// ─── POST /events/:id/bookmark — Student ─────────────────────────────────────
-
-router.post('/:id/bookmark', requireClerkUser, async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const user = await prisma.user.findUnique({ where: { clerk_user_id: req.clerkUserId! } });
-    if (!user) {
-      res.status(404).json({ success: false, error: 'User not found. Sync profile first.', requestId: req.requestId });
-      return;
-    }
-
-    const eventId = req.params.id as string;
-    const existing = await prisma.bookmark.findUnique({
-      where: { user_id_event_id: { user_id: user.id, event_id: eventId } },
-    });
-
-    if (existing) {
-      await prisma.bookmark.delete({ where: { id: existing.id } });
-      res.json({ success: true, data: { bookmarked: false }, requestId: req.requestId });
-    } else {
-      await prisma.bookmark.create({ data: { user_id: user.id, event_id: eventId } });
-      res.json({ success: true, data: { bookmarked: true }, requestId: req.requestId });
-    }
-  } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message ?? 'Failed to bookmark event.', requestId: req.requestId });
   }
 });
 
