@@ -28,8 +28,8 @@ export default function AdminLoginPage() {
 
       if (res.success) {
         // Set a session indicator cookie on this domain so proxy.ts can detect login.
-        // max-age=604800 = 7 days (matches refresh token lifetime)
-        document.cookie = "cv_admin_session=1; path=/; SameSite=Lax; max-age=604800";
+        // max-age=2592000 = 30 days
+        document.cookie = "cv_admin_session=1; path=/; SameSite=Lax; max-age=2592000";
         window.location.href = "/dashboard";
       } else {
         setError(res.error ?? "Invalid credentials");
