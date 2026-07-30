@@ -221,9 +221,9 @@ export default function BackendLoader({ children }: { children: React.ReactNode 
         {/* Stats row */}
         <div style={{ display: "flex", gap: "1rem", justifyContent: "center", marginBottom: "1.5rem" }}>
           {[
-            { label: "Events", value: "50+" },
-            { label: "Prize Pool", value: "₹5L+" },
-            { label: "Colleges", value: "200+" },
+            { label: "Events", value: "TBA" },
+            { label: "Prize Pool", value: "TBA" },
+            { label: "Colleges", value: "TBA" },
           ].map(({ label, value }) => (
             <div key={label} style={{
               flex: 1,
