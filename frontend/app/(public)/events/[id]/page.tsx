@@ -5,7 +5,7 @@ import { useAuth, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import { apiFetch, API } from "@/lib/api";
-import { Calendar, MapPin, Users, ArrowLeft, CheckCircle2, QrCode, MessageSquare, DollarSign, ShieldCheck, AlertCircle, X, Upload, Loader2, FileCheck, Clock, Download, Printer } from "lucide-react";
+import { Calendar, MapPin, Users, ArrowLeft, CheckCircle2, QrCode, MessageSquare, DollarSign, ShieldCheck, AlertCircle, X, Upload, Loader2, FileCheck, Clock, Download, Printer, FileText, BookOpen } from "lucide-react";
 
 export default function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -413,14 +413,17 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
         </div>
 
         {/* Grid Info Details */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
-          {/* Description & Rules with Scroller */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
+          {/* Card 1: Event Description / Overview */}
           <div className="glass" style={{ borderRadius: "1rem", padding: "1.75rem", display: "flex", flexDirection: "column" }}>
-            <h2 style={{ color: "#e2e8f0", fontSize: "1.25rem", fontWeight: 700, marginBottom: "1rem" }}>Overview</h2>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+              <FileText size={20} color="#6366f1" />
+              <h2 style={{ color: "#e2e8f0", fontSize: "1.25rem", fontWeight: 700 }}>Overview</h2>
+            </div>
             <div
               className="custom-scrollbar"
               style={{
-                maxHeight: "360px",
+                maxHeight: "320px",
                 overflowY: "auto",
                 paddingRight: "0.5rem",
               }}
@@ -428,17 +431,30 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
               <p style={{ color: "#94a3b8", lineHeight: 1.7, fontSize: "0.95rem", whiteSpace: "pre-line" }}>
                 {event.description}
               </p>
-
-              {event.rules && (
-                <div style={{ marginTop: "1.5rem" }}>
-                  <h3 style={{ color: "#818cf8", fontSize: "1rem", fontWeight: 700, marginBottom: "0.5rem" }}>Rules & Guidelines</h3>
-                  <p style={{ color: "#94a3b8", fontSize: "0.9rem", lineHeight: 1.6, whiteSpace: "pre-line" }}>
-                    {event.rules}
-                  </p>
-                </div>
-              )}
             </div>
           </div>
+
+          {/* Card 2: Separate Rules & Guidelines Card */}
+          {event.rules && (
+            <div className="glass" style={{ borderRadius: "1rem", padding: "1.75rem", display: "flex", flexDirection: "column", borderLeft: "4px solid #a855f7" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+                <BookOpen size={20} color="#a855f7" />
+                <h2 style={{ color: "#e2e8f0", fontSize: "1.25rem", fontWeight: 700 }}>Rules & Guidelines</h2>
+              </div>
+              <div
+                className="custom-scrollbar"
+                style={{
+                  maxHeight: "320px",
+                  overflowY: "auto",
+                  paddingRight: "0.5rem",
+                }}
+              >
+                <p style={{ color: "#94a3b8", fontSize: "0.9rem", lineHeight: 1.6, whiteSpace: "pre-line" }}>
+                  {event.rules}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Quick Action Links: Payment QR & WhatsApp */}
           <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
