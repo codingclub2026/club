@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import EventCard from "@/components/ui/EventCard";
-import { Code2, Zap, Shield, Trophy, ChevronRight, Star, Users, Calendar, ArrowRight, Target, BookOpen, Award, Cpu, Lock, Rocket } from "lucide-react";
+import { Code2, Zap, Shield, Trophy, ChevronRight, Star, Users, Calendar, ArrowRight, Target, BookOpen, Award, Cpu, Lock, Rocket, ExternalLink } from "lucide-react";
 
 async function getFeaturedEvents() {
   try {
@@ -138,9 +138,16 @@ export default async function HomePage() {
           <Zap size={14} /> RKDF Coding & Programming Club — 2026
         </div>
 
-        <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "rgba(52,211,153,0.1)", border: "1px solid rgba(52,211,153,0.3)", borderRadius: "999px", padding: "0.35rem 0.9rem", marginBottom: "2rem", fontSize: "0.78rem", color: "#34d399", fontWeight: 600 }}>
-          🎟️ Members get FREE access to Aayam Tech Fest — every event!
-        </div>
+        <a
+          href="https://aayamtechfest2026.vercel.app/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ textDecoration: "none" }}
+        >
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "rgba(52,211,153,0.1)", border: "1px solid rgba(52,211,153,0.3)", borderRadius: "999px", padding: "0.35rem 0.9rem", marginBottom: "2rem", fontSize: "0.78rem", color: "#34d399", fontWeight: 600, transition: "transform 0.2s", cursor: "pointer" }}>
+            🎟️ Members get FREE access to Aayam Tech Fest — Visit Website <ExternalLink size={12} />
+          </div>
+        </a>
 
         <h1 style={{ fontSize: "clamp(2.5rem, 8vw, 5rem)", fontWeight: 900, lineHeight: 1.1, marginBottom: "1rem", letterSpacing: "-0.02em" }}>
           <span style={{ color: "#e2e8f0" }}>Code •</span>{" "}
@@ -160,6 +167,28 @@ export default async function HomePage() {
               Explore Events <ArrowRight size={18} />
             </button>
           </Link>
+          <a
+            href="https://aayamtechfest2026.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ textDecoration: "none" }}
+          >
+            <button
+              className="btn-secondary"
+              style={{
+                fontSize: "1rem",
+                padding: "0.9rem 2rem",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                borderColor: "rgba(168, 85, 247, 0.4)",
+                color: "#c084fc",
+                background: "rgba(168, 85, 247, 0.1)",
+              }}
+            >
+              <Rocket size={18} /> Visit Aayam Tech Fest <ExternalLink size={16} />
+            </button>
+          </a>
           <Link href="/sign-up" style={{ textDecoration: "none" }}>
             <button className="btn-secondary" style={{ fontSize: "1rem", padding: "0.9rem 2rem" }}>
               Join the Club

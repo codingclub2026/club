@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
-import { Code2, Menu, X } from "lucide-react";
+import { Code2, Menu, X, ExternalLink } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const navLinks = [
@@ -150,6 +150,30 @@ export default function Navbar() {
 
         {/* Desktop & Mobile Actions */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          <a
+            href="https://aayamtechfest2026.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden-mobile"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.4rem",
+              background: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
+              color: "#ffffff",
+              padding: "0.45rem 0.9rem",
+              borderRadius: "0.5rem",
+              fontSize: "0.85rem",
+              fontWeight: 600,
+              textDecoration: "none",
+              boxShadow: "0 0 12px rgba(99, 102, 241, 0.4)",
+              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+            }}
+          >
+            <span>Aayam Tech Fest</span>
+            <ExternalLink size={14} />
+          </a>
+
           {isSignedIn ? (
             <UserButton />
           ) : (
@@ -243,6 +267,29 @@ export default function Navbar() {
                 </Link>
               );
             })}
+            <a
+              href="https://aayamtechfest2026.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileOpen(false)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                background: "linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%)",
+                border: "1px solid rgba(168, 85, 247, 0.4)",
+                color: "#ffffff",
+                padding: "0.65rem 1rem",
+                borderRadius: "0.375rem",
+                textDecoration: "none",
+                fontWeight: 600,
+                fontSize: "0.95rem",
+                marginTop: "0.25rem",
+              }}
+            >
+              <span>Visit Aayam Tech Fest</span>
+              <ExternalLink size={16} />
+            </a>
           </div>
 
           {!isSignedIn && (
