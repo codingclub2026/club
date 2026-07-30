@@ -34,10 +34,11 @@ router.post('/login', adminLoginLimiter, validate(loginSchema), async (req: Requ
     });
 
     // HttpOnly Secure cookies — admin access token
+    const isProduction = process.env.NODE_ENV === 'production';
     res.cookie(ACCESS_COOKIE, tokens.accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',  // 'none' required for cross-domain (Vercel → Render)
       path: '/',
       maxAge: ACCESS_MAX_AGE * 1000,
     });
@@ -45,8 +46,8 @@ router.post('/login', adminLoginLimiter, validate(loginSchema), async (req: Requ
     // Refresh token only accessible on refresh endpoint path
     res.cookie(REFRESH_COOKIE, tokens.refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',  // 'none' required for cross-domain
       path: '/api/v1/admin/auth',
       maxAge: REFRESH_MAX_AGE * 1000,
     });
@@ -88,18 +89,19 @@ router.post('/refresh', async (req: Request, res: Response) => {
       requestId: req.requestId,
     });
 
+    const isProduction = process.env.NODE_ENV === 'production';
     res.cookie(ACCESS_COOKIE, tokens.accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       path: '/',
       maxAge: ACCESS_MAX_AGE * 1000,
     });
 
     res.cookie(REFRESH_COOKIE, tokens.refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       path: '/api/v1/admin/auth',
       maxAge: REFRESH_MAX_AGE * 1000,
     });
@@ -123,8 +125,9 @@ router.post('/logout', requireAdmin, async (req: AdminRequest, res: Response) =>
   const refreshToken = req.cookies?.[REFRESH_COOKIE];
   await adminLogout(refreshToken, req.adminDbId);
 
-  res.clearCookie(ACCESS_COOKIE, { path: '/' });
-  res.clearCookie(REFRESH_COOKIE, { path: '/api/v1/admin/auth' });
+  const isProduction = process.env.NODE_ENV === 'production';
+  res.clearCookie(ACCESS_COOKIE, { path: '/', sameSite: isProduction ? 'none' : 'lax', secure: isProduction });
+  res.clearCookie(REFRESH_COOKIE, { path: '/api/v1/admin/auth', sameSite: isProduction ? 'none' : 'lax', secure: isProduction });
   res.json({ success: true, data: { message: 'Logged out.' }, requestId: req.requestId });
 });
 
