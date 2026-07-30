@@ -414,21 +414,30 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
 
         {/* Grid Info Details */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
-          {/* Description & Rules */}
-          <div className="glass" style={{ borderRadius: "1rem", padding: "1.75rem" }}>
+          {/* Description & Rules with Scroller */}
+          <div className="glass" style={{ borderRadius: "1rem", padding: "1.75rem", display: "flex", flexDirection: "column" }}>
             <h2 style={{ color: "#e2e8f0", fontSize: "1.25rem", fontWeight: 700, marginBottom: "1rem" }}>Overview</h2>
-            <p style={{ color: "#94a3b8", lineHeight: 1.7, fontSize: "0.95rem", whiteSpace: "pre-line" }}>
-              {event.description}
-            </p>
+            <div
+              className="custom-scrollbar"
+              style={{
+                maxHeight: "360px",
+                overflowY: "auto",
+                paddingRight: "0.5rem",
+              }}
+            >
+              <p style={{ color: "#94a3b8", lineHeight: 1.7, fontSize: "0.95rem", whiteSpace: "pre-line" }}>
+                {event.description}
+              </p>
 
-            {event.rules && (
-              <div style={{ marginTop: "1.5rem" }}>
-                <h3 style={{ color: "#818cf8", fontSize: "1rem", fontWeight: 700, marginBottom: "0.5rem" }}>Rules & Guidelines</h3>
-                <p style={{ color: "#94a3b8", fontSize: "0.9rem", lineHeight: 1.6, whiteSpace: "pre-line" }}>
-                  {event.rules}
-                </p>
-              </div>
-            )}
+              {event.rules && (
+                <div style={{ marginTop: "1.5rem" }}>
+                  <h3 style={{ color: "#818cf8", fontSize: "1rem", fontWeight: 700, marginBottom: "0.5rem" }}>Rules & Guidelines</h3>
+                  <p style={{ color: "#94a3b8", fontSize: "0.9rem", lineHeight: 1.6, whiteSpace: "pre-line" }}>
+                    {event.rules}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Quick Action Links: Payment QR & WhatsApp */}
