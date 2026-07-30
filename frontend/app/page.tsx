@@ -16,10 +16,10 @@ async function getFeaturedEvents() {
 }
 
 const stats = [
-  { label: "Members", value: "500+", icon: Users },
-  { label: "Events/Year", value: "20+", icon: Calendar },
-  { label: "Prize Pool", value: "₹5L+", icon: Trophy },
-  { label: "Workshops", value: "12+", icon: BookOpen },
+  { label: "Members", value: "TBA", icon: Users },
+  { label: "Events/Year", value: "TBA", icon: Calendar },
+  { label: "Prize Pool", value: "TBA", icon: Trophy },
+  { label: "Workshops", value: "TBA", icon: BookOpen },
 ];
 
 const objectives = [
