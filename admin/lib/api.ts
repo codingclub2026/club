@@ -32,6 +32,7 @@ export async function adminApi<T>(endpoint: string, options: RequestInit = {}): 
       return retry.json();
     }
     if (typeof window !== "undefined") {
+      document.cookie = "cv_admin_session=; path=/; SameSite=Lax; max-age=0";
       window.location.href = "/login";
     }
   }
