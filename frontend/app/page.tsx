@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import EventCard from "@/components/ui/EventCard";
-import { Code2, Zap, Shield, Trophy, ChevronRight, Star, Users, Calendar, ArrowRight, Target, BookOpen, Award, Cpu, Lock, Rocket, ExternalLink } from "lucide-react";
+import { Code2, Zap, Shield, Trophy, ChevronRight, Star, Users, Calendar, ArrowRight, Target, BookOpen, Award, Cpu, Lock, Rocket, ExternalLink, Sparkles } from "lucide-react";
 
 async function getFeaturedEvents() {
   try {
@@ -110,6 +110,49 @@ const strictNos = [
   "Hacking university systems",
   "Illegal activities",
   "Cheating during contests or plagiarism",
+];
+
+const collaborationPartners = [
+  {
+    name: "GDG RANCHI",
+    role: "Google Developer Groups Partner",
+    logo: "https://ik.imagekit.io/ioyklag3bb/logo_gdg-removebg-preview.png?updatedAt=1763748679524",
+    tag: "Community Partner",
+    description: "Official Google Developer Group partner fostering tech innovation, developer workshops, and community growth.",
+    gradient: "linear-gradient(135deg, rgba(66,133,244,0.12), rgba(52,168,83,0.12))",
+    border: "rgba(66,133,244,0.3)",
+    textColor: "#60a5fa",
+  },
+  {
+    name: "VASUDEV AI",
+    role: "Artificial Intelligence Partner",
+    logo: "https://ik.imagekit.io/ioyklag3bb/Vasudev%20ai%20logo%20PNG.png?updatedAt=1785412892953",
+    tag: "AI Partner",
+    description: "Empowering students with cutting-edge artificial intelligence, machine learning resources, and AI hackathons.",
+    gradient: "linear-gradient(135deg, rgba(168,85,247,0.12), rgba(99,102,241,0.12))",
+    border: "rgba(168,85,247,0.3)",
+    textColor: "#c084fc",
+  },
+  {
+    name: "POLORIX STUDIO",
+    role: "Creative & Design Studio Partner",
+    logo: "https://ik.imagekit.io/ioyklag3bb/PS%20LOGO.png?updatedAt=1785412892801",
+    tag: "Design Partner",
+    description: "Creative design studio powering UI/UX innovation, branding, media production, and digital experience design.",
+    gradient: "linear-gradient(135deg, rgba(6,182,212,0.12), rgba(59,130,246,0.12))",
+    border: "rgba(6,182,212,0.3)",
+    textColor: "#38bdf8",
+  },
+  {
+    name: "FF COMMUNITY",
+    role: "Developer & Tech Community Partner",
+    logo: "https://ik.imagekit.io/ioyklag3bb/WhatsApp%20Image%202026-07-30%20at%2010.14.23%20PM.jpeg?updatedAt=1785430491433",
+    tag: "Tech Community",
+    description: "Vibrant tech and developer community bringing enthusiasts together for competitive events & collaborative learning.",
+    gradient: "linear-gradient(135deg, rgba(52,211,153,0.12), rgba(16,185,129,0.12))",
+    border: "rgba(52,211,153,0.3)",
+    textColor: "#34d399",
+  },
 ];
 
 export default async function HomePage() {
@@ -383,6 +426,96 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ── AAYAM TECHFEST 2026 COLLABORATION PARTNERS ────────────────────── */}
+      <section style={{ padding: "5rem 2rem", maxWidth: 1200, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: "0.5rem",
+            background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.3)",
+            borderRadius: "999px", padding: "0.4rem 1.1rem", marginBottom: "1rem",
+            fontSize: "0.8rem", color: "#c084fc", fontWeight: 700, letterSpacing: "0.05em"
+          }}>
+            <Sparkles size={14} /> AAYAM TECHFEST 2026
+          </div>
+          <h2 style={{ fontSize: "clamp(1.8rem, 5vw, 2.5rem)", fontWeight: 900, color: "#e2e8f0", marginBottom: "0.75rem" }}>
+            Collaboration <span className="gradient-text">Partners</span>
+          </h2>
+          <p style={{ color: "#94a3b8", maxWidth: 600, margin: "0 auto", fontSize: "0.95rem" }}>
+            Proudly collaborating with leading technical communities &amp; innovators for Aayam Techfest 2026.
+          </p>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "1.5rem" }}>
+          {collaborationPartners.map((partner) => (
+            <div
+              key={partner.name}
+              className="glass glass-interactive"
+              style={{
+                borderRadius: "1.25rem",
+                padding: "1.75rem",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                textAlign: "center",
+                position: "relative",
+                overflow: "hidden",
+                border: `1px solid ${partner.border}`,
+                background: partner.gradient,
+              }}
+            >
+              {/* Logo Container */}
+              <div
+                style={{
+                  width: "84px",
+                  height: "84px",
+                  borderRadius: "1rem",
+                  background: "rgba(15, 23, 42, 0.85)",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: "1.25rem",
+                  padding: "0.6rem",
+                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.4)",
+                  overflow: "hidden"
+                }}
+              >
+                <img
+                  src={partner.logo}
+                  alt={`${partner.name} Logo`}
+                  style={{
+                    maxHeight: "100%",
+                    maxWidth: "100%",
+                    objectFit: "contain",
+                    borderRadius: partner.name === "FF COMMUNITY" ? "0.5rem" : "0px",
+                  }}
+                />
+              </div>
+
+              {/* Partner Tag */}
+              <span
+                style={{
+                  fontSize: "0.725rem",
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  color: partner.textColor,
+                  marginBottom: "0.35rem",
+                }}
+              >
+                {partner.role}
+              </span>
+              <h3 style={{ fontSize: "1.25rem", fontWeight: 800, color: "#f1f5f9", marginBottom: "0.5rem" }}>
+                {partner.name}
+              </h3>
+              <p style={{ color: "#94a3b8", fontSize: "0.85rem", lineHeight: 1.5 }}>
+                {partner.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ── RULES & CODE OF ETHICS ────────────────────────────────────────── */}
       <section style={{ padding: "5rem 2rem", maxWidth: 1200, margin: "0 auto" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "2rem" }}>
@@ -437,12 +570,21 @@ export default async function HomePage() {
               borderRadius: "1.25rem", padding: "1.75rem", textAlign: "center",
             }}>
               <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>🎟️</div>
-              <h3 style={{ color: "#e2e8f0", fontWeight: 800, fontSize: "1.1rem", marginBottom: "0.5rem" }}>Aayam Tech Fest — Free Access</h3>
-              <p style={{ color: "#94a3b8", fontSize: "0.85rem", lineHeight: 1.6 }}>
+              <h3 style={{ color: "#e2e8f0", fontWeight: 800, fontSize: "1.1rem", marginBottom: "0.5rem" }}>Aayam Tech Fest 2026 — Free Access</h3>
+              <p style={{ color: "#94a3b8", fontSize: "0.85rem", lineHeight: 1.6, marginBottom: "1rem" }}>
                 All club members enjoy <strong style={{ color: "#818cf8" }}>complimentary access</strong> to every event at Aayam Tech Fest — hackathons, workshops, seminars, and competitions.
               </p>
+              {/* Partners Badges */}
+              <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "0.5rem", flexWrap: "wrap", marginBottom: "1.25rem" }}>
+                {collaborationPartners.map((partner) => (
+                  <div key={partner.name} style={{ display: "flex", alignItems: "center", gap: "0.4rem", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "999px", padding: "0.25rem 0.65rem" }}>
+                    <img src={partner.logo} alt={partner.name} style={{ width: 16, height: 16, objectFit: "contain", borderRadius: partner.name === "FF COMMUNITY" ? "50%" : 0 }} />
+                    <span style={{ fontSize: "0.75rem", color: "#cbd5e1", fontWeight: 600 }}>{partner.name}</span>
+                  </div>
+                ))}
+              </div>
               <Link href="/sign-up" style={{ textDecoration: "none" }}>
-                <button className="btn-primary" style={{ marginTop: "1.25rem", fontSize: "0.875rem", padding: "0.625rem 1.5rem" }}>
+                <button className="btn-primary" style={{ fontSize: "0.875rem", padding: "0.625rem 1.5rem" }}>
                   Join & Get Free Access <ArrowRight size={16} />
                 </button>
               </Link>
