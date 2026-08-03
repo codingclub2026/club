@@ -629,7 +629,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                 <div>
                   <label style={{ color: "#94a3b8", fontSize: "0.85rem", fontWeight: 600, display: "block", marginBottom: "0.35rem" }}>Course / Branch *</label>
-                  <input required className="input-field" value={regForm.course} onChange={e => setRegForm(p => ({ ...p, course: e.target.value }))} placeholder="e.g. CSE, BCA" style={{ width: "100%", padding: "0.75rem", borderRadius: "0.5rem", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#e2e8f0" }} />
+                  <input required className="input-field" value={regForm.course} onChange={e => setRegForm(p => ({ ...p, course: e.target.value }))} placeholder="e.g. Btech CSE, Diploma CSE,BCA" style={{ width: "100%", padding: "0.75rem", borderRadius: "0.5rem", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#e2e8f0" }} />
                 </div>
                 <div>
                   <label style={{ color: "#94a3b8", fontSize: "0.85rem", fontWeight: 600, display: "block", marginBottom: "0.35rem" }}>Semester *</label>
