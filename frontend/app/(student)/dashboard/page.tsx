@@ -29,23 +29,35 @@ export default function DashboardPage() {
   // Modal State for Downloading Pass
   const [activeRegModal, setActiveRegModal] = useState<any | null>(null);
 
+  const fetchRegistrations = async () => {
+    try {
+      const token = await getToken();
+      const res = await apiFetch<any[]>(API.myRegistrations, {}, token);
+      if (res.success && res.data) setRegistrations(res.data);
+      return res.success ? res.data ?? [] : [];
+    } catch {
+      setRegistrations([]);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchRegistrations = async () => {
-      try {
-        const token = await getToken();
-        const res = await apiFetch<any[]>(API.myRegistrations, {}, token);
-        if (res.success && res.data) setRegistrations(res.data);
-      } catch {
-        setRegistrations([]);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchRegistrations();
   }, [getToken]);
 
-  const downloadTicketPass = (reg: any) => {
+  const downloadTicketPass = async (reg: any) => {
     if (!reg) return;
+
+    let latest = reg;
+    const freshList = await fetchRegistrations();
+    const fresh = freshList.find((r) => r.id === reg.id);
+    if (fresh) {
+      latest = fresh;
+      if (activeRegModal?.id === fresh.id) setActiveRegModal(fresh);
+    }
+
     const canvas = document.createElement("canvas");
     canvas.width = 1200;
     canvas.height = 700;
@@ -76,7 +88,7 @@ export default function DashboardPage() {
     // Event Title
     ctx.fillStyle = "#818cf8";
     ctx.font = "bold 44px sans-serif";
-    ctx.fillText(reg.event?.title || "CODEVED EVENT", 600, 180);
+    ctx.fillText(latest.event?.title || "CODEVED EVENT", 600, 180);
 
     // Divider
     ctx.strokeStyle = "rgba(255,255,255,0.15)";
@@ -95,7 +107,7 @@ export default function DashboardPage() {
     ctx.fillText("STUDENT NAME", 100, 270);
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 28px sans-serif";
-    ctx.fillText(reg.name || user?.fullName || "Student", 100, 310);
+    ctx.fillText(latest.name || user?.fullName || "Student", 100, 310);
 
     // Course & Sem
     ctx.fillStyle = "#64748b";
@@ -103,7 +115,7 @@ export default function DashboardPage() {
     ctx.fillText("COURSE & SEMESTER", 100, 370);
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 26px sans-serif";
-    ctx.fillText(`${reg.course || "—"} (${reg.semester || "—"})`, 100, 410);
+    ctx.fillText(`${latest.course || "—"} (${latest.semester || "—"})`, 100, 410);
 
     // Email Address
     ctx.fillStyle = "#64748b";
@@ -111,7 +123,7 @@ export default function DashboardPage() {
     ctx.fillText("EMAIL ADDRESS", 100, 470);
     ctx.fillStyle = "#cbd5e1";
     ctx.font = "bold 24px sans-serif";
-    ctx.fillText(reg.email || user?.primaryEmailAddress?.emailAddress || "—", 100, 510);
+    ctx.fillText(latest.email || user?.primaryEmailAddress?.emailAddress || "—", 100, 510);
 
     // Details Column 2
     // Registration No
@@ -120,7 +132,7 @@ export default function DashboardPage() {
     ctx.fillText("REGISTRATION NO", 650, 270);
     ctx.fillStyle = "#34d399";
     ctx.font = "bold 36px monospace";
-    ctx.fillText(reg.registration_no || "RKDF/GEN/001", 650, 315);
+    ctx.fillText(latest.registration_no || "—", 650, 315);
 
     // Venue Location
     ctx.fillStyle = "#64748b";
@@ -128,7 +140,7 @@ export default function DashboardPage() {
     ctx.fillText("VENUE LOCATION", 650, 370);
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 24px sans-serif";
-    ctx.fillText(reg.event?.venue || "Campus Auditorium", 650, 410);
+    ctx.fillText(latest.event?.venue || "Campus Auditorium", 650, 410);
 
     // Entry Status Badge
     ctx.fillStyle = "rgba(52,211,153,0.15)";
@@ -149,7 +161,7 @@ export default function DashboardPage() {
 
     // Trigger File Download
     const link = document.createElement("a");
-    link.download = `Event_Pass_${(reg.registration_no || "PASS").replace(/\//g, "_")}.png`;
+    link.download = `Event_Pass_${(latest.registration_no || "PASS").replace(/\//g, "_")}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
   };

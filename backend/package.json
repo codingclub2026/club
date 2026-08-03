@@ -11,6 +11,7 @@
     "seed": "ts-node prisma/seed.ts",
     "db:push": "npx prisma db push",
     "db:generate": "npx prisma generate",
+    "db:fix-reg-nos": "ts-node prisma/fix-registration-numbers.ts",
     "lint": "eslint src --ext .ts"
   },
   "prisma": {

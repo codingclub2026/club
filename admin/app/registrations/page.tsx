@@ -30,6 +30,7 @@ export default function RegistrationsPage() {
     status: "pending",
   });
   const [submittingEdit, setSubmittingEdit] = useState(false);
+  const [repairingNumbers, setRepairingNumbers] = useState(false);
 
   const fetchRegistrations = async () => {
     setLoading(true);
@@ -37,8 +38,10 @@ export default function RegistrationsPage() {
     if (selectedEvent) params.set("event_id", selectedEvent);
     if (selectedStatus) params.set("status", selectedStatus);
     const res = await adminApi<any>(`${ADMIN_API.registrations}?${params}`);
-    if (res.success) setRegistrations(res.data?.registrations ?? []);
+    const list = res.success ? res.data?.registrations ?? [] : [];
+    if (res.success) setRegistrations(list);
     setLoading(false);
+    return list;
   };
 
   const fetchEvents = async () => {
@@ -49,7 +52,7 @@ export default function RegistrationsPage() {
   useEffect(() => { fetchEvents(); }, []);
   useEffect(() => { fetchRegistrations(); }, [selectedEvent, selectedStatus]);
 
-  // Admin Approve (Generates Registration No e.g. RKDF/CSE/001)
+  // Admin Approve (Generates Registration No e.g. RKDF/BTCSE/001)
   const handleApprove = async (id: string) => {
     const res = await adminApi(`/registrations/${id}/approve`, { method: "PATCH" });
     if (res.success) fetchRegistrations();
@@ -115,8 +118,32 @@ export default function RegistrationsPage() {
     window.open(url, "_blank");
   };
 
-  const downloadTicketPass = (reg: any) => {
+  const handleRepairRegistrationNumbers = async () => {
+    if (!confirm("Reassign all approved registration numbers using BTCSE, DCSE, and BCA formats? This fixes duplicates.")) return;
+
+    setRepairingNumbers(true);
+    const res = await adminApi<{ updated: number; events: number }>("/registrations/repair-numbers", { method: "POST" });
+    setRepairingNumbers(false);
+
+    if (res.success) {
+      alert(`Updated ${res.data?.updated ?? 0} registration number(s) across ${res.data?.events ?? 0} event(s).`);
+      fetchRegistrations();
+    } else {
+      alert(res.error ?? "Failed to repair registration numbers.");
+    }
+  };
+
+  const downloadTicketPass = async (reg: any) => {
     if (!reg) return;
+
+    let latest = reg;
+    const freshList = await fetchRegistrations();
+    const fresh = freshList.find((r: any) => r.id === reg.id);
+    if (fresh) {
+      latest = fresh;
+      if (activePassModal?.id === fresh.id) setActivePassModal(fresh);
+    }
+
     const canvas = document.createElement("canvas");
     canvas.width = 1200;
     canvas.height = 700;
@@ -147,7 +174,7 @@ export default function RegistrationsPage() {
     // Event Title
     ctx.fillStyle = "#818cf8";
     ctx.font = "bold 44px sans-serif";
-    ctx.fillText(reg.event?.title || "CODEVED EVENT", 600, 180);
+    ctx.fillText(latest.event?.title || "CODEVED EVENT", 600, 180);
 
     // Divider
     ctx.strokeStyle = "rgba(255,255,255,0.15)";
@@ -166,7 +193,7 @@ export default function RegistrationsPage() {
     ctx.fillText("STUDENT NAME", 100, 270);
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 28px sans-serif";
-    ctx.fillText(reg.name || reg.user?.name || "Student", 100, 310);
+    ctx.fillText(latest.name || latest.user?.name || "Student", 100, 310);
 
     // Course & Sem
     ctx.fillStyle = "#64748b";
@@ -174,7 +201,7 @@ export default function RegistrationsPage() {
     ctx.fillText("COURSE & SEMESTER", 100, 370);
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 26px sans-serif";
-    ctx.fillText(`${reg.course || "—"} (${reg.semester || "—"})`, 100, 410);
+    ctx.fillText(`${latest.course || "—"} (${latest.semester || "—"})`, 100, 410);
 
     // Email Address
     ctx.fillStyle = "#64748b";
@@ -182,7 +209,7 @@ export default function RegistrationsPage() {
     ctx.fillText("EMAIL ADDRESS", 100, 470);
     ctx.fillStyle = "#cbd5e1";
     ctx.font = "bold 24px sans-serif";
-    ctx.fillText(reg.email || reg.user?.email || "—", 100, 510);
+    ctx.fillText(latest.email || latest.user?.email || "—", 100, 510);
 
     // Details Column 2
     // Registration No
@@ -191,7 +218,7 @@ export default function RegistrationsPage() {
     ctx.fillText("REGISTRATION NO", 650, 270);
     ctx.fillStyle = "#34d399";
     ctx.font = "bold 36px monospace";
-    ctx.fillText(reg.registration_no || "RKDF/GEN/001", 650, 315);
+    ctx.fillText(latest.registration_no || "—", 650, 315);
 
     // Venue Location
     ctx.fillStyle = "#64748b";
@@ -199,7 +226,7 @@ export default function RegistrationsPage() {
     ctx.fillText("VENUE LOCATION", 650, 370);
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 24px sans-serif";
-    ctx.fillText(reg.event?.venue || "Campus Auditorium", 650, 410);
+    ctx.fillText(latest.event?.venue || "Campus Auditorium", 650, 410);
 
     // Entry Status Badge
     ctx.fillStyle = "rgba(52,211,153,0.15)";
@@ -220,7 +247,7 @@ export default function RegistrationsPage() {
 
     // Trigger File Download
     const link = document.createElement("a");
-    link.download = `Student_Pass_${(reg.registration_no || "PASS").replace(/\//g, "_")}.png`;
+    link.download = `Student_Pass_${(latest.registration_no || "PASS").replace(/\//g, "_")}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
   };
@@ -252,9 +279,14 @@ export default function RegistrationsPage() {
             <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "#e2e8f0" }}>Registrations Management</h1>
             <p style={{ color: "#64748b", fontSize: "0.875rem" }}>{filtered.length} student entries • Approve, edit, delete or download passes</p>
           </div>
-          <button className="btn btn-outline" onClick={handleExport}>
-            <Download size={16} /> Export CSV
-          </button>
+          <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+            <button className="btn btn-outline" onClick={handleRepairRegistrationNumbers} disabled={repairingNumbers}>
+              <Check size={16} /> {repairingNumbers ? "Repairing..." : "Fix Registration Nos"}
+            </button>
+            <button className="btn btn-outline" onClick={handleExport}>
+              <Download size={16} /> Export CSV
+            </button>
+          </div>
         </div>
 
         {/* Filters */}
@@ -525,7 +557,7 @@ export default function RegistrationsPage() {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                   <div>
                     <label className="label">Registration No</label>
-                    <input className="input" placeholder="e.g. RKDF/CSE/001" value={editForm.registration_no} onChange={e => setEditForm(f => ({ ...f, registration_no: e.target.value }))} />
+                    <input className="input" placeholder="e.g. RKDF/BTCSE/001" value={editForm.registration_no} onChange={e => setEditForm(f => ({ ...f, registration_no: e.target.value }))} />
                   </div>
                   <div>
                     <label className="label">Status</label>

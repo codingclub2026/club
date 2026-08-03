@@ -1,4 +1,5 @@
 import { Router, Response } from 'express';
+import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import prisma from '../config/db';
 import { requireClerkUser, AuthenticatedRequest } from '../middleware/requireClerkUser';
@@ -6,6 +7,8 @@ import { requireAdmin, AdminRequest } from '../middleware/requireAdmin';
 import { requireRole } from '../middleware/requireRole';
 import { validate } from '../middleware/validate';
 import { uploadToImageKit } from '../services/imagekit.service';
+import { repairRegistrationNumbers } from '../services/repairRegistrationNumbers';
+import { buildRegistrationNo, extractCourseCode } from '../utils/registrationNo';
 
 const router = Router();
 
@@ -25,23 +28,55 @@ const uploadProofSchema = z.object({
   fileName: z.string().default('proof.png'),
 });
 
-// Helper to generate Registration No e.g. RKDF/CSE/001
-async function generateRegistrationNo(course: string | undefined, eventId: string): Promise<string> {
-  const courseCode = (course || 'GEN')
-    .toUpperCase()
-    .replace(/B\.?TECH/g, '')
-    .replace(/[^A-Z0-9]/g, '')
-    .slice(0, 5) || 'GEN';
+// Generates the next unique registration no per event + course branch, e.g. RKDF/BTCSE/001
+async function generateRegistrationNo(
+  tx: Prisma.TransactionClient,
+  course: string | undefined,
+  eventId: string,
+): Promise<string> {
+  const courseCode = extractCourseCode(course);
+  const prefix = `RKDF/${courseCode}/`;
+  const lockKey = `${eventId}:${courseCode}`;
 
-  const count = await prisma.registration.count({
+  // Prevent concurrent approvals from reading the same max sequence.
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
+
+  const existing = await tx.registration.findMany({
     where: {
       event_id: eventId,
-      registration_no: { not: null },
+      registration_no: { startsWith: prefix },
     },
+    select: { registration_no: true },
   });
 
-  const seq = String(count + 1).padStart(3, '0');
-  return `RKDF/${courseCode}/${seq}`;
+  let maxSeq = 0;
+  for (const { registration_no } of existing) {
+    if (!registration_no || registration_no.startsWith('__REPAIR__')) continue;
+    const seq = parseInt(registration_no.slice(prefix.length), 10);
+    if (!Number.isNaN(seq) && seq > maxSeq) maxSeq = seq;
+  }
+
+  return buildRegistrationNo(courseCode, maxSeq + 1);
+}
+
+async function confirmRegistrationWithNumber(regId: string) {
+  return prisma.$transaction(async (tx) => {
+    const existing = await tx.registration.findUnique({ where: { id: regId } });
+    if (!existing) return null;
+
+    let regNo = existing.registration_no;
+    if (!regNo) {
+      regNo = await generateRegistrationNo(tx, existing.course ?? undefined, existing.event_id);
+    }
+
+    return tx.registration.update({
+      where: { id: regId },
+      data: {
+        status: 'confirmed',
+        registration_no: regNo,
+      },
+    });
+  });
 }
 
 // ─── POST /registrations/upload-proof — Student Upload Payment Proof ───────
@@ -280,26 +315,25 @@ router.get('/', requireAdmin, requireRole('volunteer'), async (req: AdminRequest
   }
 });
 
+// ─── POST /registrations/repair-numbers — Admin Reassign All Registration Nos ─
+
+router.post('/repair-numbers', requireAdmin, requireRole('event_manager'), async (req: AdminRequest, res: Response) => {
+  try {
+    const result = await repairRegistrationNumbers();
+    res.json({ success: true, data: result, requestId: req.requestId });
+  } catch (err: any) {
+    console.error('❌ Repair registration numbers error:', err);
+    res.status(500).json({ success: false, error: 'Failed to repair registration numbers.', requestId: req.requestId });
+  }
+});
+
 // ─── PATCH /registrations/:id/approve — Admin Approve (Generates Registration No)
 
 router.patch('/:id/approve', requireAdmin, requireRole('event_manager'), async (req: AdminRequest, res: Response) => {
   try {
     const regId = String(req.params.id);
-    const existing = await prisma.registration.findUnique({ where: { id: regId } });
-    if (!existing) { res.status(404).json({ success: false, error: 'Registration not found.', requestId: req.requestId }); return; }
-
-    let regNo = existing.registration_no;
-    if (!regNo) {
-      regNo = await generateRegistrationNo(existing.course || undefined, existing.event_id);
-    }
-
-    const updated = await prisma.registration.update({
-      where: { id: regId },
-      data: {
-        status: 'confirmed',
-        registration_no: regNo,
-      },
-    });
+    const updated = await confirmRegistrationWithNumber(regId);
+    if (!updated) { res.status(404).json({ success: false, error: 'Registration not found.', requestId: req.requestId }); return; }
 
     res.json({ success: true, data: updated, requestId: req.requestId });
   } catch (err: any) {
@@ -314,20 +348,20 @@ router.patch('/:id/status', requireAdmin, requireRole('event_manager'), async (r
   try {
     const regId = String(req.params.id);
     const { status } = req.body;
+
+    if (status === 'confirmed') {
+      const updated = await confirmRegistrationWithNumber(regId);
+      if (!updated) { res.status(404).json({ success: false, error: 'Registration not found.', requestId: req.requestId }); return; }
+      res.json({ success: true, data: updated, requestId: req.requestId });
+      return;
+    }
+
     const existing = await prisma.registration.findUnique({ where: { id: regId } });
     if (!existing) { res.status(404).json({ success: false, error: 'Registration not found.', requestId: req.requestId }); return; }
 
-    let regNo = existing.registration_no;
-    if (status === 'confirmed' && !regNo) {
-      regNo = await generateRegistrationNo(existing.course || undefined, existing.event_id);
-    }
-
     const updated = await prisma.registration.update({
       where: { id: regId },
-      data: {
-        status,
-        registration_no: regNo,
-      },
+      data: { status },
     });
 
     res.json({ success: true, data: updated, requestId: req.requestId });

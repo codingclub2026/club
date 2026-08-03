@@ -165,6 +165,7 @@ model Registration {
   user         User               @relation(fields: [user_id], references: [id])
   event        Event              @relation(fields: [event_id], references: [id])
 
+  @@unique([event_id, registration_no], name: "registrations_event_registration_no_key")
   @@map("registrations")
 }
 

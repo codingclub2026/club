@@ -35,6 +35,26 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
 
   const [uploadingProof, setUploadingProof] = useState(false);
 
+  const refreshRegistrationRecord = async () => {
+    if (!isSignedIn) return registrationRecord;
+
+    try {
+      const token = await getToken();
+      const regRes = await apiFetch<any[]>(API.myRegistrations, {}, token);
+      if (regRes.success && regRes.data) {
+        const existing = regRes.data.find((r) => r.event_id === id || r.event?.id === id);
+        if (existing) {
+          setRegistrationRecord(existing);
+          return existing;
+        }
+      }
+    } catch {
+      // Keep the last known registration record.
+    }
+
+    return registrationRecord;
+  };
+
   const fetchEventData = async () => {
     setLoading(true);
     try {
@@ -146,8 +166,9 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
     }
   };
 
-  const downloadTicketPass = () => {
-    if (!registrationRecord) return;
+  const downloadTicketPass = async () => {
+    const latest = (await refreshRegistrationRecord()) || registrationRecord;
+    if (!latest) return;
     const canvas = document.createElement("canvas");
     canvas.width = 1200;
     canvas.height = 700;
@@ -197,7 +218,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
     ctx.fillText("STUDENT NAME", 100, 270);
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 28px sans-serif";
-    ctx.fillText(registrationRecord.name || user?.fullName || "Student", 100, 310);
+    ctx.fillText(latest.name || user?.fullName || "Student", 100, 310);
 
     // Course & Sem
     ctx.fillStyle = "#64748b";
@@ -205,7 +226,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
     ctx.fillText("COURSE & SEMESTER", 100, 370);
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 26px sans-serif";
-    ctx.fillText(`${registrationRecord.course || "—"} (${registrationRecord.semester || "—"})`, 100, 410);
+    ctx.fillText(`${latest.course || "—"} (${latest.semester || "—"})`, 100, 410);
 
     // Email Address
     ctx.fillStyle = "#64748b";
@@ -213,7 +234,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
     ctx.fillText("EMAIL ADDRESS", 100, 470);
     ctx.fillStyle = "#cbd5e1";
     ctx.font = "bold 24px sans-serif";
-    ctx.fillText(registrationRecord.email || user?.primaryEmailAddress?.emailAddress || "—", 100, 510);
+    ctx.fillText(latest.email || user?.primaryEmailAddress?.emailAddress || "—", 100, 510);
 
     // Details Column 2
     // Registration No
@@ -222,7 +243,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
     ctx.fillText("REGISTRATION NO", 650, 270);
     ctx.fillStyle = "#34d399";
     ctx.font = "bold 36px monospace";
-    ctx.fillText(registrationRecord.registration_no || "RKDF/GEN/001", 650, 315);
+    ctx.fillText(latest.registration_no || "—", 650, 315);
 
     // Venue Location
     ctx.fillStyle = "#64748b";
@@ -251,7 +272,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
 
     // Trigger File Download
     const link = document.createElement("a");
-    link.download = `Event_Pass_${(registrationRecord.registration_no || "PASS").replace(/\//g, "_")}.png`;
+    link.download = `Event_Pass_${(latest.registration_no || "PASS").replace(/\//g, "_")}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
   };
