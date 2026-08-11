@@ -263,6 +263,9 @@ cv_admin_rt: HttpOnly; Secure; SameSite=Strict; Path=/api/v1/admin/auth; Max-Age
 PORT=4000
 NODE_ENV=development
 FRONTEND_ORIGIN=http://localhost:3000
+ADMIN_ORIGIN=http://localhost:3001
+# Optional extra origins, comma-separated
+CORS_ORIGINS=https://codeved.vasudevai.in,https://codeved-admin.vasudevai.in
 SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 CLERK_SECRET_KEY=

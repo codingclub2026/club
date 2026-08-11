@@ -4,7 +4,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import hpp from 'hpp';
 
-import { env } from './config/env';
+import { env, getAdditionalCorsOrigins } from './config/env';
 import { requestId } from './middleware/requestId';
 import { securityHeaders } from './middleware/securityHeaders';
 import { publicLimiter } from './middleware/rateLimit';
@@ -25,14 +25,15 @@ app.use(requestId);
 app.use(securityHeaders);
 
 // ─── 3. CORS — strict allowlist ───────────────────────────────────────────────
-const allowedOrigins = [
+const allowedOrigins = Array.from(new Set([
   env.FRONTEND_ORIGIN.replace(/\/$/, ''),
   env.ADMIN_ORIGIN.replace(/\/$/, ''),
+  ...getAdditionalCorsOrigins(env.CORS_ORIGINS),
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:3002',
   'http://localhost:5173',
-];
+].map(origin => origin.replace(/\/$/, ''))));
 
 const isDev = env.NODE_ENV !== 'production';
 

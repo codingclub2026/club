@@ -15,7 +15,7 @@ async function main() {
   const server = app.listen(env.PORT, () => {
     console.log(`🚀 CodeVed API running on http://localhost:${env.PORT}`);
     console.log(`📡 Environment: ${env.NODE_ENV}`);
-    console.log(`🔒 CORS origins: ${env.FRONTEND_ORIGIN}, ${env.ADMIN_ORIGIN}`);
+    console.log(`🔒 CORS origins: ${env.FRONTEND_ORIGIN}, ${env.ADMIN_ORIGIN}${env.CORS_ORIGINS ? `, ${env.CORS_ORIGINS}` : ''}`);
   });
 
   // Graceful shutdown
