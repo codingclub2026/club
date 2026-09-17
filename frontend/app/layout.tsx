@@ -7,8 +7,12 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://codeved.vasudevai.in"),
   title: "CodeVed — Technical Fest 2026",
   description: "India's premier technical festival. Discover events, compete, and connect.",
+  verification: {
+    google: "MLrf7m9hjAG3Lxonag5zkqoY87BGiRbhR88f1W_2OiU",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
