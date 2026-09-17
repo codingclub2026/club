@@ -24,6 +24,9 @@ DIRECT_URL=postgresql://postgres:[PASSWORD]@db.[PROJECT].supabase.co:5432/postgr
 CLERK_SECRET_KEY=sk_test_...
 FRONTEND_ORIGIN=http://localhost:3000
 ADMIN_ORIGIN=http://localhost:3001
+# Optional comma-separated extra origins for the same backend CORS allowlist.
+# Example: https://codeved.vasudevai.in,https://codeved-admin.vasudevai.in
+CORS_ORIGINS=
 ADMIN_JWT_SECRET=your-32-char-min-secret-here!!!
 ARGON2_MEMORY_COST=65536
 ARGON2_TIME_COST=3
@@ -40,6 +43,8 @@ SEED_ADMIN_NAME=Super Admin
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
 NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1
 ```
+
+The frontend does not need multiple CORS origins in env. It only needs the API base URL above; the browser origin allowlist is enforced by the backend.
 
 **Admin** (`admin/.env.local` — copy from `.env.local.example`):
 ```env

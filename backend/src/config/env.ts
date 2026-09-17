@@ -5,6 +5,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   FRONTEND_ORIGIN: z.string().url(),
   ADMIN_ORIGIN: z.string().url(),
+  CORS_ORIGINS: z.string().optional(),
 
   DATABASE_URL: z.string().min(1),
 
@@ -31,3 +32,14 @@ if (!_parsed.success) {
 }
 
 export const env = _parsed.data;
+
+export function getAdditionalCorsOrigins(value?: string): string[] {
+  if (!value) {
+    return [];
+  }
+
+  return value
+    .split(',')
+    .map(origin => origin.trim().replace(/\/$/, ''))
+    .filter(Boolean);
+}
